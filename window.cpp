@@ -13,7 +13,7 @@ enum {
 };
 
 static QComboBox *createComboBox(const QString &text) {
-    QComboBox *comboBox = new QComboBox();
+    auto *const comboBox = new QComboBox();
     comboBox->setEditable(true);
     comboBox->addItem(text);
     comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -22,7 +22,7 @@ static QComboBox *createComboBox(const QString &text) {
 
 Window::Window(QWidget *parent)
     : QWidget(parent) {
-    connect(new QShortcut(QKeySequence::Quit, this), &QShortcut::activated, qApp, &QApplication::quit);
+    connect(new QShortcut(QKeySequence::Quit, this), &QShortcut::activated, QCoreApplication::instance(), &QApplication::quit);
 
     setWindowTitle(tr("DskToWoz2"));
 
@@ -42,7 +42,7 @@ Window::Window(QWidget *parent)
 
     createFilesTable();
 
-    QGridLayout *mainLayout = new QGridLayout(this);
+    auto *const mainLayout = new QGridLayout(this);
     mainLayout->addWidget(new QLabel(tr("File name pattern:")), 0, 0);
     mainLayout->addWidget(fileComboBox, 0, 1, 1, 2);
 
@@ -59,12 +59,8 @@ Window::Window(QWidget *parent)
 }
 
 Window::~Window() {
-    if (this->filesTable) {
-        delete this->filesTable;
-    }
-    if (this->model) {
-        delete this->model;
-    }
+    delete this->filesTable;
+    delete this->model;
 }
 
 void Window::browse() {
@@ -182,9 +178,7 @@ void Window::find() {
     progressDialog.setWindowTitle(tr("Find Files"));
     progressDialog.show();
 
-    if (this->model) {
-        delete this->model;
-    }
+    delete this->model;
     this->model = new QStandardItemModel();
     QStringList header;
     header << tr("Source DSK file") << tr("Size") << tr("VTOC") << tr("Destination WOZ file") << tr("Directory");
@@ -232,13 +226,11 @@ void Window::find() {
 }
 
 void Window::animateFindClick() {
-    findButton->animateClick();
+    this->findButton->animateClick();
 }
 
 void Window::createFilesTable() {
-    if (this->filesTable) {
-        delete this->filesTable;
-    }
+    delete this->filesTable;
     this->filesTable = new QTableView(this);
     this->filesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->filesTable->horizontalHeader()->setStretchLastSection(true);
