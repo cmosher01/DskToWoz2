@@ -1,6 +1,8 @@
 #include "window.h"
 #include "conversion.h"
+#include "dsktowoz2.h"
 #include "crc32.h"
+#include <QtGlobal>
 #include <QDebug>
 #include <QApplication>
 #include <QShortcut>
@@ -237,6 +239,15 @@ void Window::createFilesTable() {
     this->filesTable->setSelectionMode(QAbstractItemView::NoSelection);
 }
 
+static void dskToWoz2cpp(const QByteArray &rbDsk, const QFileInfo dsk, const std::uint32_t crc, const bool sector16, const QFileInfo woz) {
+    dskToWoz2(
+        reinterpret_cast<const uint8_t *>(rbDsk.constData()),
+        qPrintable(dsk.fileName()),
+        crc,
+        sector16 ? 1 : 0,
+        qPrintable(woz.filePath()));
+}
+
 void Window::convert() {
     for (QLinkedList<const Conversion>::const_iterator i = this->cvts.constBegin(); i != this->cvts.constEnd(); ++i) {
         const Conversion &cvt(*i);
@@ -249,5 +260,6 @@ void Window::convert() {
         qDebug() << "    crc:" << QString("$%1").arg(crc, 1, 16).toUpper();
         qDebug() << "    dos:" << cvt.dos();
         qDebug() << "    sectors per track:" << (cvt.is13() ? "13" : "16");
+        dskToWoz2cpp(rbSrc, cvt.dsk(), crc, !cvt.is13(), cvt.woz());
     }
 }
