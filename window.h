@@ -1,6 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "conversion.h"
 #include <QWidget>
 #include <QObject>
 #include <QComboBox>
@@ -9,6 +10,7 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QDir>
+#include <QLinkedList>
 
 class Window : public QWidget {
     Q_OBJECT
@@ -20,14 +22,11 @@ class Window : public QWidget {
         QPushButton *findButton = nullptr;
         QTableView *filesTable = nullptr;
         QStandardItemModel *model = nullptr;
-        QDir *currentDir = nullptr;
+        QFileInfo dirRoot;
+
+        QLinkedList<const Conversion> cvts;
 
         void createFilesTable();
-        QStandardItem *colFile(const QString &filePath);
-        QStandardItem *colSize(const QString &filePath);
-        QStandardItem *colVtoc(const QString &filePath);
-        QStandardItem *colFileWoz(const QString &filePath);
-        QStandardItem *colDir(const QString &filePath);
 
     private slots:
         void browse();

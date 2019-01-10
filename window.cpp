@@ -1,4 +1,5 @@
 #include "window.h"
+#include "conversion.h"
 #include <QApplication>
 #include <QShortcut>
 #include <QLineEdit>
@@ -7,6 +8,9 @@
 #include <QProgressDialog>
 #include <QDirIterator>
 #include <QHeaderView>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 
 enum {
     absoluteFileNameRole = Qt::UserRole + 1
@@ -26,7 +30,7 @@ Window::Window(QWidget *parent)
 
     setWindowTitle(tr("DskToWoz2"));
 
-    QPushButton *browseButton = new QPushButton(tr("\u2190 &Browse"), this);
+    auto *browseButton = new QPushButton(tr("\u2190 &Browse"), this);
     connect(browseButton, &QAbstractButton::clicked, this, &Window::browse);
 
     this->findButton = new QPushButton(tr("&Find"), this);
@@ -38,7 +42,7 @@ Window::Window(QWidget *parent)
     directoryComboBox = createComboBox(QDir::toNativeSeparators(QDir::currentPath()));
     connect(directoryComboBox->lineEdit(), &QLineEdit::returnPressed, this, &Window::animateFindClick);
 
-    filesFoundLabel = new QLabel;
+    this->filesFoundLabel = new QLabel();
 
     createFilesTable();
 
@@ -79,80 +83,40 @@ static void updateComboBox(QComboBox *comboBox) {
     }
 }
 
-QStandardItem *Window::colFile(const QString &filePath) {
-    const QFileInfo info(filePath);
-    return new QStandardItem(info.fileName());
+static QStandardItem *colFile(const Conversion &cvt) {
+    return new QStandardItem(cvt.dsk().fileName());
 }
 
-QStandardItem *Window::colDir(const QString &filePath) {
-    const QFileInfo info(this->currentDir->relativeFilePath(filePath));
-    return new QStandardItem(info.path()+QDir::separator());
+static QStandardItem *colDir(const Conversion &cvt) {
+    return new QStandardItem(cvt.root().dir().relativeFilePath(cvt.dsk().filePath())+QDir::separator());
 }
 
-QStandardItem *Window::colFileWoz(const QString &filePath) {
-    const QFileInfo info(filePath);
-
-    const bool ok = !info.exists();
+static QStandardItem *colFileWoz(const Conversion &cvt) {
+    if (cvt.dos().isEmpty()) {
+        return new QStandardItem("");
+    }
+    const bool ok = !cvt.woz().exists();
     const QIcon &icon = QApplication::style()->standardIcon(
         ok
         ? QStyle::SP_DialogApplyButton
         : QStyle::SP_DialogCancelButton);
 
-    return new QStandardItem(icon, info.fileName()+(ok ? "" : " (exists)"));
+    return new QStandardItem(icon, cvt.woz().fileName()+(ok ? "" : " (exists)"));
 }
 
-QStandardItem *Window::colVtoc(const QString &filePath) {
-    const qint64 size = QFileInfo(filePath).size();
+static QStandardItem *colVtoc(const Conversion &cvt) {
+    const QString dos = cvt.dos();
 
-    const bool d16 = (size == 0x23000u);
-    const bool d13 = (size == 0x1C700u);
-    if (!(d16 || d13)) {
-        return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "");
-    }
-
-    QFile f(filePath);
-    if (!f.open(QIODevice::ReadOnly)) {
-        return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "");
-    }
-
-
-
-    if (!f.seek(d16 ? 0x11001u : 0x0DD01u)) {
-        return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "");
-    }
-
-    char b = 0;
-    f.read(&b, 1);
-    if (b != 0x11) {
-        return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "");
-    }
-
-
-
-    if (!f.seek(d16 ? 0x11027 : 0x0DD27)) {
-        return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "");
-    }
-
-    b = 0;
-    f.read(&b, 1);
-    if (b != 0x7A) {
-        return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "");
-    }
-
-    f.seek(d16 ? 0x11003u : 0x0DD03u);
-    b = 0;
-    f.read(&b, 1);
-    b += '0';
-    if (b < '0' || '9' < b) {
-        b = '?';
-    }
-    QString dos = "DOS 3.";
-    dos += b;
-    return new QStandardItem(QApplication::style()->standardIcon(QStyle::SP_DialogApplyButton), dos);
+    return new QStandardItem(
+        QApplication::style()->standardIcon(
+            dos.isEmpty()
+            ? QStyle::SP_DialogCancelButton
+            : QStyle::SP_DialogApplyButton),
+        dos.isEmpty() ? "(no VTOC)" : dos);
 }
 
-QStandardItem *Window::colSize(const QString &filePath) {
-    const qint64 size = QFileInfo(filePath).size();
+static QStandardItem *colSize(const Conversion &cvt) {
+    const qint64 size = cvt.dsk().size();
     char hexbuf[32];
     sprintf(hexbuf, "$%llX", size);
 
@@ -165,10 +129,25 @@ QStandardItem *Window::colSize(const QString &filePath) {
     return new QStandardItem(icon, hexbuf);
 }
 
+static QList<QStandardItem*> buildRow(const Conversion &cvt) {
+    QList<QStandardItem*> items;
+
+    items.append(colFile(cvt));
+    items.append(colSize(cvt));
+    items.append(colVtoc(cvt));
+    items.append(colFileWoz(cvt));
+    items.append(colDir(cvt));
+
+    return items;
+}
+
 void Window::find() {
-    QString fileName = this->fileComboBox->currentText();
-    QString path = QDir::cleanPath(this->directoryComboBox->currentText());
-    this->currentDir = new QDir(path);
+    QString path = QDir::toNativeSeparators(QDir::cleanPath(this->directoryComboBox->currentText()));
+    if (!path.endsWith(QDir::separator())) {
+        path = path+QDir::separator();
+    }
+
+    this->dirRoot = QFileInfo(path);
 
     updateComboBox(this->fileComboBox);
     updateComboBox(this->directoryComboBox);
@@ -185,7 +164,7 @@ void Window::find() {
     this->model->setHorizontalHeaderLabels(header);
     this->filesTable->setModel(this->model);
 
-    QStringList filter = fileName.split(";");
+    QStringList filter = this->fileComboBox->currentText().split(";");
     filter.replaceInStrings(QRegularExpression("^ *(.*) *$"), "\\1");
     QDirIterator it(path, filter, QDir::AllEntries | QDir::Readable | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     std::int32_t c = 0;
@@ -193,24 +172,12 @@ void Window::find() {
         const QString filePath = it.next();
         ++c;
 
+        const Conversion cvt(QFileInfo(filePath), QFileInfo(this->dirRoot));
+        this->cvts << cvt;
 
-
-        QList<QStandardItem*> items;
-
-        items.append(colFile(filePath));
-        items.append(colSize(filePath));
-        items.append(colVtoc(filePath));
-        items.append(colFileWoz(filePath+".woz"));
-        items.append(colDir(filePath));
-
-        this->model->appendRow(items);
-
-        this->filesTable->setRowHeight(c-1, 8);
+        this->model->appendRow(buildRow(cvt));
         this->filesTable->scrollToBottom();
-
-
         this->filesFoundLabel->setText(tr("%n file(s) found. (Search in progress.)", "", c));
-        progressDialog.setLabelText(tr("%n file(s) found", "", c));
         QCoreApplication::processEvents();
     }
     const int cols = this->model->columnCount();
@@ -236,4 +203,7 @@ void Window::createFilesTable() {
     this->filesTable->horizontalHeader()->setStretchLastSection(true);
     this->filesTable->setAlternatingRowColors(true);
     this->filesTable->setShowGrid(false);
+    QHeaderView *verticalHeader = this->filesTable->verticalHeader();
+    verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
+    verticalHeader->setDefaultSectionSize(8);
 }
