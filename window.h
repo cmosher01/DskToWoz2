@@ -31,7 +31,6 @@ class Window : public QWidget {
     private slots:
         void browse();
         void find();
-        void animateFindClick();
 
     public:
         Window(QWidget *parent = nullptr);

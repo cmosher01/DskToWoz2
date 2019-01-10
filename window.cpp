@@ -11,6 +11,10 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QIcon>
+#include <QSize>
+#include <QString>
+#include <QAbstractItemView>
 
 enum {
     absoluteFileNameRole = Qt::UserRole + 1
@@ -30,33 +34,41 @@ Window::Window(QWidget *parent)
 
     setWindowTitle(tr("DskToWoz2"));
 
-    auto *browseButton = new QPushButton(tr("\u2190 &Browse"), this);
-    connect(browseButton, &QAbstractButton::clicked, this, &Window::browse);
 
-    this->findButton = new QPushButton(tr("&Find"), this);
-    this->findButton->setFocus();
-    connect(this->findButton, &QAbstractButton::clicked, this, &Window::find);
 
-    fileComboBox = createComboBox(tr("*.dsk; *.do; *.d16; *.d13"));
-    connect(fileComboBox->lineEdit(), &QLineEdit::returnPressed, this, &Window::animateFindClick);
-    directoryComboBox = createComboBox(QDir::toNativeSeparators(QDir::currentPath()));
-    connect(directoryComboBox->lineEdit(), &QLineEdit::returnPressed, this, &Window::animateFindClick);
 
-    this->filesFoundLabel = new QLabel();
-
-    createFilesTable();
 
     auto *const mainLayout = new QGridLayout(this);
-    mainLayout->addWidget(new QLabel(tr("File name pattern:")), 0, 0);
+
+    mainLayout->addWidget(new QLabel(tr("File name patterns:")), 0, 0);
+    fileComboBox = createComboBox(tr("*.dsk; *.do; *.d16; *.d13"));
+    this->fileComboBox->setFocusPolicy(Qt::StrongFocus);
     mainLayout->addWidget(fileComboBox, 0, 1, 1, 2);
 
-    mainLayout->addWidget(new QLabel(tr("Directory:")), 2, 0);
+    mainLayout->addWidget(new QLabel(tr("Directory:")), 2, 0);    
+    directoryComboBox = createComboBox(QDir::toNativeSeparators(QDir::currentPath()));
+    this->directoryComboBox->setFocusPolicy(Qt::StrongFocus);
     mainLayout->addWidget(directoryComboBox, 2, 1);
+    auto *browseButton = new QPushButton(tr("\u2190  Browse"), this);
+    browseButton->setFocusPolicy(Qt::StrongFocus);
+    connect(browseButton, &QAbstractButton::clicked, this, &Window::browse);
     mainLayout->addWidget(browseButton, 2, 2);
 
+    this->findButton = new QPushButton(tr("\u2193  Find  \u2193"), this);
+    this->findButton->setFocusPolicy(Qt::StrongFocus);
+    this->findButton->setFocus();
+    connect(this->findButton, &QAbstractButton::clicked, this, &Window::find);
     mainLayout->addWidget(findButton, 3, 0);
+
+    createFilesTable();
     mainLayout->addWidget(filesTable, 4, 0, 1, 3);
+
+    this->filesFoundLabel = new QLabel("(Search not yet performed.)");
     mainLayout->addWidget(filesFoundLabel, 5, 0, 1, 3);
+
+    setLayout(mainLayout);
+
+
 
     setWindowState(Qt::WindowMaximized);
     show();
@@ -77,6 +89,13 @@ void Window::browse() {
     }
 }
 
+static QIcon iconOkNg(const bool ok) {
+    return QApplication::style()->standardIcon(
+        ok
+        ? QStyle::SP_DialogApplyButton
+        : QStyle::SP_DialogCancelButton);
+}
+
 static void updateComboBox(QComboBox *comboBox) {
     if (comboBox->findText(comboBox->currentText()) == -1) {
         comboBox->addItem(comboBox->currentText());
@@ -88,7 +107,8 @@ static QStandardItem *colFile(const Conversion &cvt) {
 }
 
 static QStandardItem *colDir(const Conversion &cvt) {
-    return new QStandardItem(cvt.root().dir().relativeFilePath(cvt.dsk().filePath())+QDir::separator());
+    const QString rel = cvt.root().dir().relativeFilePath(cvt.dsk().filePath());
+    return new QStandardItem(QFileInfo(rel).path()+QDir::separator());
 }
 
 static QStandardItem *colFileWoz(const Conversion &cvt) {
@@ -96,37 +116,24 @@ static QStandardItem *colFileWoz(const Conversion &cvt) {
         return new QStandardItem("");
     }
     const bool ok = !cvt.woz().exists();
-    const QIcon &icon = QApplication::style()->standardIcon(
-        ok
-        ? QStyle::SP_DialogApplyButton
-        : QStyle::SP_DialogCancelButton);
-
-    return new QStandardItem(icon, cvt.woz().fileName()+(ok ? "" : " (exists)"));
+    return new QStandardItem(
+        iconOkNg(ok),
+        cvt.woz().fileName()+(ok ? "" : " (exists)"));
 }
 
 static QStandardItem *colVtoc(const Conversion &cvt) {
     const QString dos = cvt.dos();
-
     return new QStandardItem(
-        QApplication::style()->standardIcon(
-            dos.isEmpty()
-            ? QStyle::SP_DialogCancelButton
-            : QStyle::SP_DialogApplyButton),
+        iconOkNg(!dos.isEmpty()),
         dos.isEmpty() ? "(no VTOC)" : dos);
 }
 
 static QStandardItem *colSize(const Conversion &cvt) {
     const qint64 size = cvt.dsk().size();
-    char hexbuf[32];
-    sprintf(hexbuf, "$%llX", size);
-
     const bool ok = (size == 0x23000u || size == 0x1C700u);
-    const QIcon &icon = QApplication::style()->standardIcon(
-        ok
-        ? QStyle::SP_DialogApplyButton
-        : QStyle::SP_DialogCancelButton);
-
-    return new QStandardItem(icon, hexbuf);
+    return new QStandardItem(
+        iconOkNg(ok),
+        QString("$%1").arg(size, 1, 16).toUpper());
 }
 
 static QList<QStandardItem*> buildRow(const Conversion &cvt) {
@@ -192,18 +199,21 @@ void Window::find() {
     }
 }
 
-void Window::animateFindClick() {
-    this->findButton->animateClick();
-}
-
 void Window::createFilesTable() {
     delete this->filesTable;
     this->filesTable = new QTableView(this);
+    this->filesTable->setFocusPolicy(Qt::NoFocus);
     this->filesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->filesTable->horizontalHeader()->setStretchLastSection(true);
     this->filesTable->setAlternatingRowColors(true);
-    this->filesTable->setShowGrid(false);
-    QHeaderView *verticalHeader = this->filesTable->verticalHeader();
+    this->filesTable->setShowGrid(true);
+    this->filesTable->setGridStyle(Qt::DotLine);
+    this->filesTable->setFont(QFont("Helvetica", 8));
+    this->filesTable->setIconSize(QSize(8, 8));
+    QHeaderView *const verticalHeader = this->filesTable->verticalHeader();
     verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
-    verticalHeader->setDefaultSectionSize(8);
+    verticalHeader->setMinimumSectionSize(1);
+    verticalHeader->setDefaultSectionSize(14);
+    this->filesTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->filesTable->setSelectionMode(QAbstractItemView::NoSelection);
 }
