@@ -12,6 +12,7 @@ class Conversion final {
         const QFileInfo _dsk;
         const QFileInfo _woz;
         const QString _dos;
+        const bool _13;
 
     public:
         Conversion(const QFileInfo &filePath, const QFileInfo &root);
@@ -20,6 +21,7 @@ class Conversion final {
         QFileInfo root() const;
         QString dos() const;
         bool ok() const;
+        bool is13() const;
 };
 
 #endif // CONVERSION_H

@@ -60,11 +60,17 @@ static QString readDos(const QFileInfo &dsk) {
     return "DOS 3." + QString(b);
 }
 
+static bool calc13(const QFileInfo &dsk) {
+    const qint64 size = dsk.size();
+    return size == 0x1C700u;
+}
+
 Conversion::Conversion(const QFileInfo &filePath, const QFileInfo &root):
     _root(abs(root)),
     _dsk(abs(filePath)),
     _woz(abs(filePath.filePath()+".woz")),
-    _dos(readDos(_dsk)) {
+    _dos(readDos(_dsk)),
+    _13(calc13(_dsk)) {
 }
 
 QFileInfo Conversion::dsk() const {
@@ -85,4 +91,8 @@ QString Conversion::dos() const {
 
 bool Conversion::ok() const {
     return !this->_dos.isEmpty() && !this->_woz.exists();
+}
+
+bool Conversion::is13() const {
+    return this->_13;
 }

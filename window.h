@@ -18,11 +18,11 @@ class Window : public QWidget {
     private:
         QComboBox *fileComboBox = nullptr;
         QComboBox *directoryComboBox = nullptr;
+        QFileInfo dirRoot;
         QLabel *filesFoundLabel = nullptr;
-        QPushButton *findButton = nullptr;
         QTableView *filesTable = nullptr;
         QStandardItemModel *model = nullptr;
-        QFileInfo dirRoot;
+        QPushButton *convertButton = nullptr;
 
         QLinkedList<const Conversion> cvts;
 
@@ -31,6 +31,7 @@ class Window : public QWidget {
     private slots:
         void browse();
         void find();
+        void convert();
 
     public:
         Window(QWidget *parent = nullptr);

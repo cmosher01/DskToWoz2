@@ -2,7 +2,8 @@ QT += widgets
 requires(qtConfig(filedialog))
 
 HEADERS       = window.h \
-    conversion.h
+    conversion.h \
+    crc32.h
 SOURCES       = main.cpp \
                 window.cpp \
     crc32.c \

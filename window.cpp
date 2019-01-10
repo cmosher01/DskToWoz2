@@ -1,5 +1,7 @@
 #include "window.h"
 #include "conversion.h"
+#include "crc32.h"
+#include <QDebug>
 #include <QApplication>
 #include <QShortcut>
 #include <QLineEdit>
@@ -41,30 +43,36 @@ Window::Window(QWidget *parent)
     auto *const mainLayout = new QGridLayout(this);
 
     mainLayout->addWidget(new QLabel(tr("File name patterns:")), 0, 0);
-    fileComboBox = createComboBox(tr("*.dsk; *.do; *.d16; *.d13"));
+    this->fileComboBox = createComboBox(tr("*.dsk; *.do; *.d16; *.d13"));
     this->fileComboBox->setFocusPolicy(Qt::StrongFocus);
-    mainLayout->addWidget(fileComboBox, 0, 1, 1, 2);
+    mainLayout->addWidget(this->fileComboBox, 0, 1, 1, 2);
 
     mainLayout->addWidget(new QLabel(tr("Directory:")), 2, 0);    
-    directoryComboBox = createComboBox(QDir::toNativeSeparators(QDir::currentPath()));
+    this->directoryComboBox = createComboBox(QDir::toNativeSeparators(QDir::currentPath()));
     this->directoryComboBox->setFocusPolicy(Qt::StrongFocus);
-    mainLayout->addWidget(directoryComboBox, 2, 1);
-    auto *browseButton = new QPushButton(tr("\u2190  Browse"), this);
+    mainLayout->addWidget(this->directoryComboBox, 2, 1);
+    auto *browseButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_DirIcon), tr("\u2190  Browse"), this);
     browseButton->setFocusPolicy(Qt::StrongFocus);
     connect(browseButton, &QAbstractButton::clicked, this, &Window::browse);
     mainLayout->addWidget(browseButton, 2, 2);
 
-    this->findButton = new QPushButton(tr("\u2193  Find  \u2193"), this);
-    this->findButton->setFocusPolicy(Qt::StrongFocus);
-    this->findButton->setFocus();
-    connect(this->findButton, &QAbstractButton::clicked, this, &Window::find);
+    auto *const findButton = new QPushButton(tr("\u2193  Find  \u2193"), this);
+    findButton->setFocusPolicy(Qt::StrongFocus);
+    findButton->setFocus();
+    connect(findButton, &QAbstractButton::clicked, this, &Window::find);
     mainLayout->addWidget(findButton, 3, 0);
 
     createFilesTable();
-    mainLayout->addWidget(filesTable, 4, 0, 1, 3);
+    mainLayout->addWidget(this->filesTable, 4, 0, 1, 3);
 
     this->filesFoundLabel = new QLabel("(Search not yet performed.)");
-    mainLayout->addWidget(filesFoundLabel, 5, 0, 1, 3);
+    mainLayout->addWidget(this->filesFoundLabel, 5, 0, 1, 3);
+
+    this->convertButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_DialogSaveButton), tr("Convert"), this);
+    this->convertButton->setFocusPolicy(Qt::StrongFocus);
+    this->convertButton->setEnabled(false);
+    connect(this->convertButton, &QAbstractButton::clicked, this, &Window::convert);
+    mainLayout->addWidget(this->convertButton, 6, 0);
 
     setLayout(mainLayout);
 
@@ -171,6 +179,8 @@ void Window::find() {
     this->model->setHorizontalHeaderLabels(header);
     this->filesTable->setModel(this->model);
 
+    this->convertButton->setEnabled(false);
+
     QStringList filter = this->fileComboBox->currentText().split(";");
     filter.replaceInStrings(QRegularExpression("^ *(.*) *$"), "\\1");
     QDirIterator it(path, filter, QDir::AllEntries | QDir::Readable | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
@@ -180,11 +190,15 @@ void Window::find() {
         ++c;
 
         const Conversion cvt(QFileInfo(filePath), QFileInfo(this->dirRoot));
-        this->cvts << cvt;
 
         this->model->appendRow(buildRow(cvt));
         this->filesTable->scrollToBottom();
         this->filesFoundLabel->setText(tr("%n file(s) found. (Search in progress.)", "", c));
+
+        if (cvt.ok()) {
+            this->cvts << cvt;
+        }
+
         QCoreApplication::processEvents();
     }
     const int cols = this->model->columnCount();
@@ -196,6 +210,11 @@ void Window::find() {
         this->filesFoundLabel->setText(tr("%n file(s) found. (Search was cancelled.)", "", c));
     } else {
         this->filesFoundLabel->setText(tr("%n file(s) found. (Search complete.)", "", c));
+    }
+
+    this->convertButton->setEnabled(this->cvts.size());
+    if (this->cvts.size()) {
+        this->convertButton->setFocus();
     }
 }
 
@@ -216,4 +235,19 @@ void Window::createFilesTable() {
     verticalHeader->setDefaultSectionSize(14);
     this->filesTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->filesTable->setSelectionMode(QAbstractItemView::NoSelection);
+}
+
+void Window::convert() {
+    for (QLinkedList<const Conversion>::const_iterator i = this->cvts.constBegin(); i != this->cvts.constEnd(); ++i) {
+        const Conversion &cvt(*i);
+        qDebug() << cvt.dsk().filePath();
+        QFile src(cvt.dsk().filePath());
+        src.open(QIODevice::ReadOnly);
+        QByteArray rbSrc = src.readAll();
+        qDebug() << "    bytes:" << QString("$%1").arg(rbSrc.size(), 1, 16).toUpper();
+        std::uint32_t crc = crc32(reinterpret_cast<const uint8_t *>(rbSrc.constData()), size_t(rbSrc.size()));
+        qDebug() << "    crc:" << QString("$%1").arg(crc, 1, 16).toUpper();
+        qDebug() << "    dos:" << cvt.dos();
+        qDebug() << "    sectors per track:" << (cvt.is13() ? "13" : "16");
+    }
 }
