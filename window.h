@@ -29,11 +29,13 @@
 #include <QStandardItemModel>
 #include <QDir>
 #include <QLinkedList>
+#include <QMenuBar>
 
 class Window : public QWidget {
     Q_OBJECT
 
     private:
+        QMenuBar *menuBar;
         QComboBox *fileComboBox = nullptr;
         QComboBox *directoryComboBox = nullptr;
         QFileInfo dirRoot;
@@ -50,6 +52,7 @@ class Window : public QWidget {
         void browse();
         void find();
         void convert();
+        void createEmpty();
 
     public:
         Window(QWidget *parent = nullptr);

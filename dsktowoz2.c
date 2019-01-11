@@ -65,7 +65,7 @@ static void header(uint32_t crc) {
 }
 
 // sectorFormat: 0=unk, 1=13-s, 2=16-s, 3=both
-static void info(const uint8_t sectorFormat) {
+static void info(const uint8_t sectorFormat, const uint16_t max_blocks) {
     fwrite("INFO", 1, 4, woz);
     uint32_t sizeInfo = 60;
     fwrite(&sizeInfo, sizeof(sizeInfo), 1, woz);
@@ -102,7 +102,7 @@ static void info(const uint8_t sectorFormat) {
     uint16_t ramK = 0; // minimum RAM, 0=unk
     fwrite(&ramK, sizeof(ramK), 1, woz);
 
-    uint16_t blocksInLargestTrack = BLOCKS_PER_TRACK;
+    uint16_t blocksInLargestTrack = max_blocks;
     fwrite(&blocksInLargestTrack, sizeof(blocksInLargestTrack), 1, woz);
 
     uint8_t fill = 0;
@@ -111,13 +111,13 @@ static void info(const uint8_t sectorFormat) {
     }
 }
 
-static void tmap() {
+static void tmap(const uint8_t real_tracks) {
     fwrite("TMAP", 1, 4, woz);
     uint32_t sizeTmap = C_QTRACK;
     fwrite(&sizeTmap, sizeof(sizeTmap), 1, woz);
 
     uint8_t empty = 0xFFu;
-    for (uint8_t qt = 0; qt < C_REAL_QTRACK; ++qt) {
+    for (uint8_t qt = 0; qt < real_tracks; ++qt) {
         if ((qt+2) % 4) {
             uint8_t t = (qt+2) / 4;
             fwrite(&t, sizeof(t), 1, woz);
@@ -125,17 +125,17 @@ static void tmap() {
             fwrite(&empty, sizeof(empty), 1, woz);
         }
     }
-    for (uint8_t qt = C_REAL_QTRACK; qt < C_QTRACK; ++qt) {
+    for (uint8_t qt = real_tracks; qt < C_QTRACK; ++qt) {
         fwrite(&empty, sizeof(empty), 1, woz);
     }
 }
 
-static void trks(uint32_t bitsPerTrack) {
+static void trks(uint32_t bitsPerTrack, const uint8_t real_tracks) {
     fwrite("TRKS", 1, 4, woz);
-    uint32_t sizeTrks = C_QTRACK*8 + C_REAL_TRACK*BLOCKS_PER_TRACK*0x200u;
+    uint32_t sizeTrks = C_QTRACK*8 + real_tracks*BLOCKS_PER_TRACK*0x200u;
     fwrite(&sizeTrks, sizeof(sizeTrks), 1, woz);
     uint16_t block = 3;
-    for (uint8_t qt = 0; qt < C_REAL_TRACK; ++qt) {
+    for (uint8_t qt = 0; qt < real_tracks; ++qt) {
         fwrite(&block, sizeof(block), 1, woz);
         uint16_t blocksPerTrack = BLOCKS_PER_TRACK;
         fwrite(&blocksPerTrack, sizeof(blocksPerTrack), 1, woz);
@@ -143,7 +143,7 @@ static void trks(uint32_t bitsPerTrack) {
 
         block += BLOCKS_PER_TRACK;
     }
-    for (uint8_t qt = C_REAL_TRACK; qt < C_QTRACK; ++qt) {
+    for (uint8_t qt = real_tracks; qt < C_QTRACK; ++qt) {
         uint16_t fillBlock = 0;
         fwrite(&fillBlock, sizeof(fillBlock), 1, woz);
         uint32_t fillCountBits = 0;
@@ -347,8 +347,8 @@ static uint_fast8_t deduce_encoding(uint_fast8_t dos33, uint8_t track, uint8_t s
     return ENC_53A;
 }
 
-static void bits(const uint8_t *rb_dsk, uint_fast8_t dos33) {
-    for (uint8_t t = 0; t < C_REAL_TRACK; ++t) {
+static void bits(const uint8_t *rb_dsk, uint_fast8_t dos33, const uint8_t real_tracks) {
+    for (uint8_t t = 0; t < real_tracks; ++t) {
         clear();
         uint32_t i = 0;
         i = writeSyncGap(i, 0x20u, 1+dos33);
@@ -377,6 +377,24 @@ static void meta(const char *name_dsk, const uint32_t crc_dsk) {
 
 
 
+void emptyWoz2(const char *path_woz) {
+    woz = fopen(path_woz, "rb");
+    if (woz) {
+        fclose(woz);
+        fprintf(stderr, "ERROR: %s exists; will NOT overwrite existing output file\n", path_woz);
+        return;
+    }
+
+    woz = fopen(path_woz, "wb");
+
+    header(0); // TODO calculate CRC
+    info(0, 0);
+    tmap(0);
+    trks(0, 0);
+
+    fclose(woz);
+}
+
 void dskToWoz2(const uint8_t *rb_dsk, const char *name_dsk, const uint32_t crc_dsk, const int sector16, const char *path_woz) {
     uint_fast8_t dos33 = !!sector16;
 
@@ -391,10 +409,10 @@ void dskToWoz2(const uint8_t *rb_dsk, const char *name_dsk, const uint32_t crc_d
     woz = fopen(path_woz, "wb");
 
     header(0); // TODO calculate CRC
-    info(1+dos33);
-    tmap();
-    trks(bits_per_track);
-    bits(rb_dsk, dos33);
+    info(1+dos33, BLOCKS_PER_TRACK);
+    tmap(C_REAL_QTRACK);
+    trks(bits_per_track, C_REAL_TRACK);
+    bits(rb_dsk, dos33, C_REAL_TRACK);
     meta(name_dsk, crc_dsk);
 
     fclose(woz);

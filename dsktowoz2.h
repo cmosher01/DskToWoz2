@@ -29,6 +29,7 @@ extern "C" {
 
 
 extern void dskToWoz2(const uint8_t *rb_dsk, const char *name_dsk, uint32_t crc_dsk, int sector16, const char *path_woz);
+extern void emptyWoz2(const char *path_woz);
 
 
 

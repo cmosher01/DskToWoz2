@@ -38,6 +38,7 @@
 #include <QSize>
 #include <QString>
 #include <QAbstractItemView>
+#include <QAction>
 
 enum {
     absoluteFileNameRole = Qt::UserRole + 1
@@ -58,6 +59,13 @@ Window::Window(QWidget *parent)
     setWindowTitle(tr("DskToWoz2"));
 
 
+
+    this->menuBar = new QMenuBar(nullptr);
+
+    auto *const createEmpty = new QAction(tr("Create empty WOZ disk"), this);
+    createEmpty->setMenuRole(QAction::ApplicationSpecificRole);
+    connect(createEmpty, &QAction::triggered, this, &Window::createEmpty);
+    this->menuBar->addMenu("")->addAction(createEmpty);
 
 
 
@@ -305,4 +313,13 @@ void Window::convert() {
     }
 
     runlog->end();
+}
+
+void Window::createEmpty() {
+    QFileDialog dialog(this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (dialog.exec() == QDialog::Accepted) {
+        emptyWoz2(qPrintable(dialog.selectedFiles().first()));
+    }
 }
