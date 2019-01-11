@@ -1,3 +1,21 @@
+/*
+    DskToWoz2
+
+    Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA. <cmosher01@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY, without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "dsktowoz2.h"
 #include "a2const.h"
 #include "nibblize_4_4.h"
@@ -155,7 +173,7 @@ static uint8_t map_sector_13(uint8_t s) {
 }
 
 static const uint8_t mp_sector16do[] = { 0x0, 0x7, 0xE, 0x6, 0xD, 0x5, 0xC, 0x4, 0xB, 0x3, 0xA, 0x2, 0x9, 0x1, 0x8, 0xF };
-static const uint8_t mp_sector16po[] = { 0x0, 0x8, 0x1, 0x9, 0x2, 0xA, 0x3, 0xB, 0x4, 0xC, 0x5, 0xD, 0x6, 0xE, 0x7, 0xF };
+// TODO ProDOS: static const uint8_t mp_sector16po[] = { 0x0, 0x8, 0x1, 0x9, 0x2, 0xA, 0x3, 0xB, 0x4, 0xC, 0x5, 0xD, 0x6, 0xE, 0x7, 0xF };
 
 static uint8_t map_sector_do16(uint8_t s) {
     return mp_sector16do[s];
@@ -344,6 +362,19 @@ static void bits(const uint8_t *rb_dsk, uint_fast8_t dos33) {
     }
 }
 
+static void meta(const char *name_dsk, const uint32_t crc_dsk) {
+    fwrite("META", 1, 4, woz);
+    uint32_t sizeMeta = 35+strlen(name_dsk);
+    fwrite(&sizeMeta, sizeof(sizeMeta), 1, woz);
+
+    fputs("orig_filename\t", woz); //14
+    fputs(name_dsk, woz); // strlen(name_dsk)
+    fputs("\n", woz); //1
+
+    fputs("orig_crc\t", woz); //9
+    fprintf(woz, "0x%08X\n", crc_dsk); //11
+}
+
 
 
 void dskToWoz2(const uint8_t *rb_dsk, const char *name_dsk, const uint32_t crc_dsk, const int sector16, const char *path_woz) {
@@ -364,7 +395,7 @@ void dskToWoz2(const uint8_t *rb_dsk, const char *name_dsk, const uint32_t crc_d
     tmap();
     trks(bits_per_track);
     bits(rb_dsk, dos33);
-// TODO    info(name_dsk, crc_dsk)
+    meta(name_dsk, crc_dsk);
 
     fclose(woz);
 }

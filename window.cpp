@@ -1,4 +1,23 @@
+/*
+    DskToWoz2
+
+    Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA. <cmosher01@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY, without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "window.h"
+#include "runlog.h"
 #include "conversion.h"
 #include "dsktowoz2.h"
 #include "crc32.h"
@@ -249,17 +268,41 @@ static void dskToWoz2cpp(const QByteArray &rbDsk, const QFileInfo dsk, const std
 }
 
 void Window::convert() {
+    hide();
+
+    const int c = this->cvts.size();
+
+    auto *const runlog = new RunLog(this);
+    runlog->log(QString("Converting %1 files...\n\n").arg(c));
+
     for (QLinkedList<const Conversion>::const_iterator i = this->cvts.constBegin(); i != this->cvts.constEnd(); ++i) {
         const Conversion &cvt(*i);
-        qDebug() << cvt.dsk().filePath();
+
+        runlog->log(cvt.dsk().filePath());
+
         QFile src(cvt.dsk().filePath());
+
         src.open(QIODevice::ReadOnly);
         QByteArray rbSrc = src.readAll();
-        qDebug() << "    bytes:" << QString("$%1").arg(rbSrc.size(), 1, 16).toUpper();
+        runlog->log("    bytes: "+QString("$%1").arg(rbSrc.size(), 1, 16).toUpper());
+
         std::uint32_t crc = crc32(reinterpret_cast<const uint8_t *>(rbSrc.constData()), size_t(rbSrc.size()));
-        qDebug() << "    crc:" << QString("$%1").arg(crc, 1, 16).toUpper();
-        qDebug() << "    dos:" << cvt.dos();
-        qDebug() << "    sectors per track:" << (cvt.is13() ? "13" : "16");
+        runlog->log("    crc: "+QString("$%1").arg(crc, 1, 16).toUpper());
+
+        runlog->log("    dos: "+cvt.dos());
+        runlog->log("    sectors per track: "+QString((cvt.is13() ? "13" : "16")));
+
+
+
         dskToWoz2cpp(rbSrc, cvt.dsk(), crc, !cvt.is13(), cvt.woz());
+
+
+
+        runlog->log("    created WOZ 2.0 file: "+cvt.woz().filePath());
+        runlog->log("\n");
+
+        QCoreApplication::processEvents();
     }
+
+    runlog->end();
 }

@@ -16,12 +16,29 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef UUID_eeba25b1054b4b6aa5bbb7426a9ec7e1
-#define UUID_eeba25b1054b4b6aa5bbb7426a9ec7e1
+#ifndef RUNLOG_H
+#define RUNLOG_H
 
-#include <stdint.h>
+#include <QObject>
+#include <QDialog>
+#include <QPlainTextEdit>
+#include <QString>
+#include <QPushButton>
 
-void nibblize_5_3_alt_encode(const uint8_t **original, uint8_t **encoded);
-void nibblize_5_3_alt_decode(const uint8_t **original, uint8_t **decoded);
+class RunLog : public QDialog {
+    Q_OBJECT
 
-#endif
+    private:
+        QPlainTextEdit *_log;
+        QPushButton *_quit;
+
+    private slots:
+        void quitApp();
+
+    public:
+        explicit RunLog(QWidget *parent = nullptr);
+        void log(const QString &msg);
+        void end();
+};
+
+#endif // RUNLOG_H

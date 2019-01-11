@@ -10,7 +10,8 @@ HEADERS       = window.h \
     nibblize_5_3.h \
     nibblize_6_2.h \
     a2const.h \
-    dsktowoz2.h
+    dsktowoz2.h \
+    runlog.h
 SOURCES       = main.cpp \
                 window.cpp \
     crc32.c \
@@ -20,7 +21,8 @@ SOURCES       = main.cpp \
     nibblize_5_3_alt.c \
     nibblize_5_3_common.c \
     nibblize_5_3.c \
-    nibblize_6_2.c
+    nibblize_6_2.c \
+    runlog.cpp
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/widgets/dialogs/findfiles
