@@ -1,0 +1,11 @@
+image: ubuntu
+
+before_script:
+  - apt-get update -qq
+  - apt-get install -y qt5-default
+
+build:
+  stage: build
+  script:
+    - qmake
+    - make
