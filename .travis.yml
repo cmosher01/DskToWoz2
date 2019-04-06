@@ -15,9 +15,11 @@ matrix:
       install:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
     - os: windows
+      before_install:
+        - curl -LO http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe
+        - curl -LO https://raw.githubusercontent.com/wireshark/wireshark/master/tools/qt-installer-windows.qs
       install:
-        - choco install qt-sdk-windows-x64-mingw_seh
-
+        - ./qt-unified-windows-x86-online.exe --script qt-installer-windows.qs
 
 script:
   - qmake
