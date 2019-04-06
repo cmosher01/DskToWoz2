@@ -28,7 +28,7 @@ extern "C" {
 
 
 
-extern uint32_t crc32(const uint8_t *p, size_t c);
+extern uint32_t crc32_woz2(const uint8_t *p, size_t c);
 
 
 

@@ -80,12 +80,12 @@ Window::Window(QWidget *parent)
     this->directoryComboBox = createComboBox(QDir::toNativeSeparators(QDir::currentPath()));
     this->directoryComboBox->setFocusPolicy(Qt::StrongFocus);
     mainLayout->addWidget(this->directoryComboBox, 2, 1);
-    auto *browseButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_DirIcon), tr("\u2190  Browse"), this);
+    auto *browseButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_DirIcon), tr(" \u2190 Browse"), this);
     browseButton->setFocusPolicy(Qt::StrongFocus);
     connect(browseButton, &QAbstractButton::clicked, this, &Window::browse);
     mainLayout->addWidget(browseButton, 2, 2);
 
-    auto *const findButton = new QPushButton(tr("\u2193  Find  \u2193"), this);
+    auto *const findButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_FileDialogContentsView), tr(" \u2193 Find"), this);
     findButton->setFocusPolicy(Qt::StrongFocus);
     findButton->setFocus();
     connect(findButton, &QAbstractButton::clicked, this, &Window::find);
@@ -97,7 +97,7 @@ Window::Window(QWidget *parent)
     this->filesFoundLabel = new QLabel("(Search not yet performed.)");
     mainLayout->addWidget(this->filesFoundLabel, 5, 0, 1, 3);
 
-    this->convertButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_DialogSaveButton), tr("Convert"), this);
+    this->convertButton = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_DialogSaveButton), tr(" Convert"), this);
     this->convertButton->setFocusPolicy(Qt::StrongFocus);
     this->convertButton->setEnabled(false);
     connect(this->convertButton, &QAbstractButton::clicked, this, &Window::convert);
@@ -294,7 +294,7 @@ void Window::convert() {
         QByteArray rbSrc = src.readAll();
         runlog->log("    bytes: "+QString("$%1").arg(rbSrc.size(), 1, 16).toUpper());
 
-        std::uint32_t crc = crc32(reinterpret_cast<const uint8_t *>(rbSrc.constData()), size_t(rbSrc.size()));
+        std::uint32_t crc = crc32_woz2(reinterpret_cast<const uint8_t *>(rbSrc.constData()), size_t(rbSrc.size()));
         runlog->log("    crc: "+QString("$%1").arg(crc, 1, 16).toUpper());
 
         runlog->log("    dos: "+cvt.dos());
