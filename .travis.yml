@@ -26,19 +26,22 @@ matrix:
         - PATH=/c/Users/travis/Qt/Tools/mingw730_64/bin:/c/Users/travis/Qt/5.12.0/mingw73_64/bin:$PATH
         - ARTIFACT=$ARTIFACT.exe
       install:
+        - pwd
         - ./qt-unified-windows-x86-online.exe --script qt-installer-windows.qs
         - choco install make
 
 script:
+  - env
   - echo $ARTIFACT
-  - echo $PATH
   - pwd
-  - ls
-  - ls /c/Users/travis/Qt/
-  - ls /c/Users/travis/Qt/5.12.0/
-  - ls /c/Users/travis/Qt/5.12.0/mingw73_64/bin
+  - echo $PATH
+  - ls -l /c/Users/travis
+  - ls -l /c/Users/travis/build
+  - ls -l /c/Users/travis/build/cmosher01
+  - ls -l /c
   - qmake
   - make
+  - ls -l
 
 deploy:
   provider: releases
