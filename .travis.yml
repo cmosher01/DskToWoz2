@@ -2,7 +2,7 @@ dist: xenial
 sudo: required
 language: cpp
 compiler:
-  - gcc
+  - clang
 before_install:
   - sudo apt-get -qq update
 install:
