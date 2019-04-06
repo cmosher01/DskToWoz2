@@ -1,2 +1,2 @@
-/build/
-/*.pro.user
+*.o
+moc_*

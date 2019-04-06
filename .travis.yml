@@ -1,3 +1,7 @@
+env:
+  global:
+    - ARTIFACT=dsktowoz2
+
 language: cpp
 
 matrix:
@@ -20,10 +24,27 @@ matrix:
         - curl -LO https://raw.githubusercontent.com/wireshark/wireshark/master/tools/qt-installer-windows.qs
       env:
         - PATH=/c/Users/travis/Qt/Tools/mingw730_64/bin:/c/Users/travis/Qt/5.12.0/mingw73_64/bin:$PATH
+        - ARTIFACT=$ARTIFACT.exe
       install:
         - ./qt-unified-windows-x86-online.exe --script qt-installer-windows.qs
         - choco install make
 
 script:
+  - echo $ARTIFACT
+  - echo $PATH
+  - pwd
+  - ls
+  - ls /c/Users/travis/Qt/
+  - ls /c/Users/travis/Qt/5.12.0/
+  - ls /c/Users/travis/Qt/5.12.0/mingw73_64/bin
   - qmake
   - make
+
+deploy:
+  provider: releases
+  api_key:
+    secure: lQjv9EulUMLKGGaNmbBloDIM8TQCjkx2qfjCQwjU2DzZmFVWBrf6NP9Otf5Pq/vkYm7Q5ueTdRlRBLccV8rr8f8TgwL2aKKcy6/Q323A2g3kIbzRQGn8X8J0+GEMJYzeNt0AxtoxnCQ3hjE6WRTYo3qtM7sWlqIGwmLIuH30tANHc/fRq1JOXtZp6IOAwSro8AYF8inmlvG/AKw4yNyO6iJVXwkQfZHnM4AMBzVbhPhTPt1eIGUBDRCrEhAMAoJAF522Y2VN0i98KGT3HCDFpxa/6J45IU+04Cp62JN7bE+04Ryj5mSVRSQh8X7nfxd23PQamYEA006qjtaXgIaII8fI8+ekB0ptMqaYCn/ozeDuOpYew8O6ve2ODa+lu8A23KpFX7gma3Zhcetj12xExqE6spb+eUOrz+b3gRT/5cXvKjKZvz7+5wfr8S2GaWFY60QpTdJEyzfaQyt5mU+T4A8FamBKqYbeTkXhznqi6ltzVhpfblC54G9+Qr31eccmtIeOSmiq2J+DkUQMTljrbQztsJjhFwvjyNrxxME55Cc9F7dWFNyO0Ew+K6B2wdx4T8Nvoi+8LkKKv1H8xM8SKl1iszJXQUBYqu+fpY/nbrhSm0u7oayPrTaMH3WT4GWVg81XZJ5Rz+32nv/1+rh7sMfrXnRT3T0f8ZfBP6UNpkw=
+  file: $ARTIFACT
+  skip_cleanup: true
+  on:
+    tags: true
