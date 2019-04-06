@@ -12,10 +12,10 @@ matrix:
       install:
         - sudo apt-get install -y build-essential qt5-default
     - os: osx
+      env:
+        - PATH=/usr/local/opt/qt/bin:$PATH
       install:
-        - brew install qt
-        - ls -l /usr/local/bin
-        - ls -l /usr/local/opt/qt
+        - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
 
 script:
   - qmake
