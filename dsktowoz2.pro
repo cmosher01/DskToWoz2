@@ -1,5 +1,7 @@
 QT += widgets
 
+CONFIG += c++11
+
 HEADERS = window.h \
     conversion.h \
     crc32.h \
