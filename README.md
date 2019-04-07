@@ -1,4 +1,6 @@
-# DskToWoz2 [![Build Status](https://travis-ci.com/cmosher01/DskToWoz2.svg?branch=master)](https://travis-ci.com/cmosher01/DskToWoz2)
+# DskToWoz2
+[![Latest Release](https://img.shields.io/github/release-pre/cmosher01/DskToWoz2.svg)](https://github.com/cmosher01/DskToWoz2/releases/latest)
+[![Build Status](https://travis-ci.com/cmosher01/DskToWoz2.svg?branch=master)](https://travis-ci.com/cmosher01/DskToWoz2)
 
 Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA; cmosher01@gmail.com ; https://mosher.mine.nu
 

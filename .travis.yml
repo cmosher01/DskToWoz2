@@ -6,28 +6,30 @@ matrix:
       dist: xenial
       sudo: required
       env:
-        - ARTIFACT=$(basename *.pro .pro)-${TRAVIS_OS_NAME}
+        - NAME=$(basename *.pro .pro)
       before_install:
         - sudo apt-get -qq update
       install:
         - sudo apt-get install -y build-essential qt5-default
       script:
         - qmake
-        - make TARGET=$ARTIFACT
+        - make
+        - zip -j ${NAME}-${TRAVIS_OS_NAME} ${NAME}
     - os: osx
       env:
-        - ARTIFACT=$(basename *.pro .pro)-${TRAVIS_OS_NAME}
+        - NAME=$(basename *.pro .pro)
         - PATH=/usr/local/opt/qt/bin:$PATH
       install:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
       script:
         - qmake
-        - make TARGET=$ARTIFACT
+        - make
+        - zip -j ${NAME}-${TRAVIS_OS_NAME} ${NAME}
     - os: windows
       before_install:
         - curl -LO http://download.qt.io/official_releases/qt/5.12/5.12.2/qt-opensource-windows-x86-5.12.2.exe
       env:
-        - ARTIFACT=release/$(basename $(pwd)).exe
+        - NAME=$(basename $(pwd))
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
         - choco install make
@@ -35,12 +37,14 @@ matrix:
       script:
         - qmake
         - make
+        - zip -j ${NAME}-${TRAVIS_OS_NAME} release/${NAME}.exe
 
 deploy:
   provider: releases
   api_key:
     secure: uTlXzA/1qIu1k02Hb3DOrP60/eBtPN1QbqpEWAgoCBSfr8FCJuheQsOW226kH0yzGbPyI6wB2cMEzrehWnWx3Au0od1CXVH0fs4Ob4KbJd0cTT2ML+OVTp8eKj3wBz6YTQ8E0f66eawOeZwWTuFsnkkPPNyI/pz38XAJIvS4sHQoVphdUt/gG0zMnwKA14SPvdkpsfaD/OcIFuvD7HRrfZG6tzZE/htgWsum5XTyYP9oZPalT5pW+vdl6VIdZbhOnc/ityTvm2PW89yBlnyP3U14eU79KnvFJbYhGpRQChHb06/m//CmpOQeJnEWIczf6Y6NvUWhk3zVuNflPaCVpouK40H06kE8iyCJBcpiOd+Rza+19e3n6FQYj9h+caOzgzWokDnm/6wEqTBpcY0u5U2fhC9Ky3Eeg8JGHoLJPZ5RSct83q4oV1J+u8geJF2Lun95SQKae5AZpHeaowLBV8ABAAZsnCjPJHA8hSdXEwtgSAVyXIRG84JN6iXIfiQZ5Sb0cPmuKaYx3yC5f8mUsrlZ3bnRHsxsf4IuWW8q2EyVmmzawGMzDDK6eRwP3emdl4Yz1S76T6D1vPJxQiV1CU6OdIzrkiGENNFUzpMtIbLhQVTYFP3j3cEf/1zDXT0dyae8l0Y9vfWqZRl530AqLfVGGtu0DiuUzpUf7DMlPrk=
-  file: $ARTIFACT
+  file_glob: true
+  file: *.zip
   skip_cleanup: true
   on:
     tags: true
