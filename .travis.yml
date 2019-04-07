@@ -1,6 +1,7 @@
 env:
   global:
     - ARTIFACT=dsktowoz2
+    - XXX="$(basename *.pro)"
 
 language: cpp
 
@@ -24,24 +25,23 @@ matrix:
     - os: windows
       before_install:
         - curl -LO http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe
-        - curl -LO https://raw.githubusercontent.com/wireshark/wireshark/master/tools/qt-installer-windows.qs
       env:
-        - PATH=/c/Qt/Tools/msvc2017/bin:/c/Qt/5.12.0/msvc2017/bin:$PATH
+        - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
         - ARTIFACT=$ARTIFACT-win.exe
       install:
         - pwd
-        - ./qt-unified-windows-x86-online.exe --script qt-installer-windows.qs
-        - choco install make
+        - ./qt-unified-windows-x86-online.exe --script qt-headless.qs
 
 script:
   - env
   - echo $ARTIFACT
   - pwd
   - echo $PATH
-  - ls -l /c/Qt/Tools || true
-  - ls -l /c/Qt/Tools/5.12.0 || true
-  - ls -l /c/Qt/Tools/msvc2017 || true
-  - ls -l /c/Qt/5.12.0/msvc2017/bin || true
+  - ls -l /c/Qt || true
+  - ls -l /c/Qt/5.12.2 || true
+  - ls -l /c/Qt/5.12.2/mingw73_64 || true
+  - ls -l /c/Qt/5.12.2/mingw73_64/bin || true
+  - ls -l /c/Qt/Tools/mingw730_64/bin || true
   - qmake
   - make TARGET=$ARTIFACT
   - ls -l
