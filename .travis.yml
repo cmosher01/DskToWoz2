@@ -27,7 +27,7 @@ matrix:
       before_install:
         - curl -LO http://download.qt.io/official_releases/qt/5.12/5.12.2/qt-opensource-windows-x86-5.12.2.exe
       env:
-        - ARTIFACT=$(basename $(pwd).exe
+        - ARTIFACT=release/$(basename $(pwd)).exe
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
         - choco install make
