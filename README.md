@@ -2,7 +2,7 @@
 
 
 
-<small>Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA; cmosher01@gmail.com ; https://mosher.mine.nu</small>
+Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA <cmosher01@gmail.com>
 
 
 
