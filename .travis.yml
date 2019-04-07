@@ -17,19 +17,19 @@ matrix:
         - zip -j ${NAME}-${TRAVIS_OS_NAME} ${NAME}
     - os: osx
       env:
-        - NAME=$(basename *.pro .pro)
+        - NAME=$(basename $PWD)
         - PATH=/usr/local/opt/qt/bin:$PATH
       install:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
       script:
         - qmake
         - make
-        - zip -j ${NAME}-${TRAVIS_OS_NAME} ${NAME}
+        - zip -j ${NAME}-${TRAVIS_OS_NAME} ${NAME}.app/Contents/MacOS/${NAME}
     - os: windows
       before_install:
         - curl -LO http://download.qt.io/official_releases/qt/5.12/5.12.2/qt-opensource-windows-x86-5.12.2.exe
       env:
-        - NAME=$(basename $(pwd))
+        - NAME=$(basename $PWD)
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
         - choco install zip

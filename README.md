@@ -2,10 +2,7 @@
 
 
 
-<small>
-Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA; cmosher01@gmail.com ; https://mosher.mine.nu
-Released under GPLv3 license.
-</small>
+<small>Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA; cmosher01@gmail.com ; https://mosher.mine.nu</small>
 
 
 
