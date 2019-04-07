@@ -42,6 +42,10 @@ Controller.prototype.ReadyForInstallationPageCallback = function(){
     gui.clickButton(buttons.NextButton);
 }
 
+Controller.prototype.PerformInstallationPageCallback = function(){
+    gui.clickButton(buttons.NextButton);
+}
+
 Controller.prototype.FinishedPageCallback = function(){
     var checkBoxForm = gui.currentPageWidget().LaunchQtCreatorCheckBoxForm
     if (checkBoxForm && checkBoxForm.launchQtCreatorCheckBox){
