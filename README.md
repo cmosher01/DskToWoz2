@@ -1,10 +1,17 @@
 # DskToWoz2
-[![Latest Release](https://img.shields.io/github/release-pre/cmosher01/DskToWoz2.svg)](https://github.com/cmosher01/DskToWoz2/releases/latest)
-[![Build Status](https://travis-ci.com/cmosher01/DskToWoz2.svg?branch=master)](https://travis-ci.com/cmosher01/DskToWoz2)
 
+
+
+<small>
 Copyright © 2019, Christopher Alan Mosher, Shelton, CT, USA; cmosher01@gmail.com ; https://mosher.mine.nu
+Released under GPLv3 license.
+</small>
 
-Released under GPLv3 license. [![License](https://img.shields.io/github/license/cmosher01/DskToWoz2.svg)](https://www.gnu.org/licenses/gpl.html)
+
+
+[![Latest Release](https://img.shields.io/github/release-pre/cmosher01/DskToWoz2.svg)](https://github.com/cmosher01/DskToWoz2/releases/latest)
+[![License](https://img.shields.io/github/license/cmosher01/DskToWoz2.svg)](https://www.gnu.org/licenses/gpl.html)
+[![Build Status](https://travis-ci.com/cmosher01/DskToWoz2.svg?branch=master)](https://travis-ci.com/cmosher01/DskToWoz2)
 
 
 
