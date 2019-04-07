@@ -1,12 +1,14 @@
 language: cpp
 
+env:
+  global:
+    - NAME=$(basename $PWD)
+
 matrix:
   include:
     - os: linux
       dist: xenial
       sudo: required
-      env:
-        - NAME=$(basename *.pro .pro)
       before_install:
         - sudo apt-get -qq update
       install:
@@ -14,10 +16,9 @@ matrix:
       script:
         - qmake
         - make
-        - zip -j ${NAME}-${TRAVIS_OS_NAME} ${NAME}
+        - zip -j ${NAME}-${TRAVIS_OS_NAME} $(basename *.pro .pro)
     - os: osx
       env:
-        - NAME=$(basename $PWD)
         - PATH=/usr/local/opt/qt/bin:$PATH
       install:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
@@ -29,7 +30,6 @@ matrix:
       before_install:
         - curl -LO http://download.qt.io/official_releases/qt/5.12/5.12.2/qt-opensource-windows-x86-5.12.2.exe
       env:
-        - NAME=$(basename $PWD)
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
         - choco install zip
