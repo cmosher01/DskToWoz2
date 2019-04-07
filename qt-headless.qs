@@ -2,53 +2,51 @@ function Controller() {
     installer.autoRejectMessageBoxes();
     installer.installationFinished.connect(function() {
         gui.clickButton(buttons.NextButton);
-    })
+    });
 }
 
-Controller.prototype.WelcomePageCallback = function(){
+Controller.prototype.WelcomePageCallback = function() {
     gui.clickButton(buttons.NextButton, 3000);
 }
 
-Controller.prototype.CredentialsPageCallback = function(){
+Controller.prototype.CredentialsPageCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.IntroductionPageCallback = function(){
+Controller.prototype.IntroductionPageCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.TargetDirectoryPageCallback = function(){
+Controller.prototype.TargetDirectoryPageCallback = function() {
     gui.currentPageWidget().TargetDirectoryLineEdit.setText("C:/Qt");
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.ComponentSelectionPageCallback = function(){
-    var widget = gui.currentPageWidget();
-    widget.deselectAll();
-    widget.selectComponent("qt.qt5.5110.gcc_64");
+Controller.prototype.ComponentSelectionPageCallback = function() {
+    gui.currentPageWidget().selectAll();
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.LicenseAgreementPageCallback = function(){
+Controller.prototype.LicenseAgreementPageCallback = function() {
     gui.currentPageWidget().AcceptLicenseRadioButton.setChecked(true);
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.StartMenuDirectoryPageCallback = function(){
+Controller.prototype.StartMenuDirectoryPageCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.ReadyForInstallationPageCallback = function(){
+Controller.prototype.ReadyForInstallationPageCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.PerformInstallationPageCallback = function(){
+Controller.prototype.PerformInstallationPageCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 
-Controller.prototype.FinishedPageCallback = function(){
-    var checkBoxForm = gui.currentPageWidget().LaunchQtCreatorCheckBoxForm
-    if (checkBoxForm && checkBoxForm.launchQtCreatorCheckBox){
+Controller.prototype.FinishedPageCallback = function() {
+    var checkBoxForm = gui.currentPageWidget().LaunchQtCreatorCheckBoxForm;
+    if (checkBoxForm && checkBoxForm.launchQtCreatorCheckBox) {
         checkBoxForm.launchQtCreatorCheckBox.checked = false;
     }
     gui.clickButton(buttons.FinishButton);
