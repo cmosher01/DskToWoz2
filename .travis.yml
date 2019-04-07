@@ -30,11 +30,12 @@ matrix:
         - ARTIFACT=$ARTIFACT-win.exe
       install:
         - pwd
-        - ./qt-unified-windows-x86-online.exe --script qt-headless.qs
+        - travis_wait 37 ./qt-unified-windows-x86-online.exe --script qt-headless.qs
 
 script:
   - env
   - echo $ARTIFACT
+  - echo $XXX
   - pwd
   - echo $PATH
   - ls -l /c/Qt || true
