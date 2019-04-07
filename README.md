@@ -1,6 +1,6 @@
 # DskToWoz2
 
-Copyright © 2019, Christopher Alan Mosher, Shelton, Connecticut, USA, <cmosher01@gmail.com>
+Copyright © 2019, Christopher Alan Mosher, Shelton, Connecticut, USA, <cmosher01@gmail.com>.
 
 [![License](https://img.shields.io/github/license/cmosher01/DskToWoz2.svg)](https://www.gnu.org/licenses/gpl.html)
 [![Latest Release](https://img.shields.io/github/release-pre/cmosher01/DskToWoz2.svg)](https://github.com/cmosher01/DskToWoz2/releases/latest)
@@ -8,14 +8,14 @@ Copyright © 2019, Christopher Alan Mosher, Shelton, Connecticut, USA, <cmosher0
 
 Converts Apple ][ disk images in
 [DSK format](http://apple2.org.za/gswv/a2zine/faqs/Csa2FLUTILS.html#006) to
-[WOZ 2.0 format](https://applesaucefdc.com/woz/reference2/) .
+[WOZ 2.0 format](https://applesaucefdc.com/woz/reference2/).
 
-`*.dsk` &#x2192 `*.woz`
+`*.dsk` → `*.woz`
 
 ---
 
 Input floppy disk images are expected to be in Apple DOS 3.x format (16-sector or 13-sector),
-with one physical byte per logical byte. Common file types include: `.dsk` `.do` `d13` `.d16`
+with one physical byte per logical byte. Common file types include: `.dsk` `.do` `.d13` `.d16`
 
 16-sector image files must be 143360 bytes in size, and 13-sector images must be 116480 bytes in size.
 Images must be normal DOS 3.x disks with a normal VTOC at track $11.
