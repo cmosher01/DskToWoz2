@@ -20,7 +20,7 @@ matrix:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
     - os: windows
       before_install:
-        - curl -LO http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe
+        - curl -LO http://download.qt.io/official_releases/qt/5.12/5.12.2/qt-opensource-windows-x86-5.12.2.exe
       env:
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
@@ -34,7 +34,7 @@ script:
   - echo $TRAVIS_OS_NAME
   - ls -l /c/Qt || true
   - ls -l /c/Qt/Tools || true
-  - ls -l /c/Qt/5.11.0 || true
+  - ls -l /c/Qt/5.12.2 || true
   - qmake
   - make TARGET=$NAME-$TRAVIS_OS_NAME
   - ls -l

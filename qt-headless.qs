@@ -23,7 +23,9 @@ Controller.prototype.TargetDirectoryPageCallback = function() {
 }
 
 Controller.prototype.ComponentSelectionPageCallback = function() {
-    gui.currentPageWidget().selectAll();
+    var widget = gui.currentPageWidget();
+    widget.deselectAll();
+    widget.selectComponent("qt.qt5.5122.win64_mingw730");
     gui.clickButton(buttons.NextButton);
 }
 
