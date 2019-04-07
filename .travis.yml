@@ -1,17 +1,14 @@
+language: cpp
+
 env:
   global:
-    - ARTIFACT=dsktowoz2
-    - XXX="$(basename *.pro)"
-
-language: cpp
+    - NAME=$(basename *.pro .pro)
 
 matrix:
   include:
     - os: linux
       dist: xenial
       sudo: required
-      env:
-        - ARTIFACT=$ARTIFACT-linux
       before_install:
         - sudo apt-get -qq update
       install:
@@ -19,7 +16,6 @@ matrix:
     - os: osx
       env:
         - PATH=/usr/local/opt/qt/bin:$PATH
-        - ARTIFACT=$ARTIFACT-mac
       install:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
     - os: windows
@@ -27,31 +23,29 @@ matrix:
         - curl -LO http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe
       env:
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
-        - ARTIFACT=$ARTIFACT-win.exe
       install:
         - pwd
-        - travis_wait 37 ./qt-unified-windows-x86-online.exe --script qt-headless.qs
+        - ./qt-unified-windows-x86-online.exe --verbose --script qt-headless.qs
 
 script:
   - env
-  - echo $ARTIFACT
-  - echo $XXX
   - pwd
   - echo $PATH
+  - echo $TRAVIS_OS_NAME
   - ls -l /c/Qt || true
   - ls -l /c/Qt/5.12.2 || true
   - ls -l /c/Qt/5.12.2/mingw73_64 || true
   - ls -l /c/Qt/5.12.2/mingw73_64/bin || true
   - ls -l /c/Qt/Tools/mingw730_64/bin || true
   - qmake
-  - make TARGET=$ARTIFACT
+  - make TARGET=$NAME-$TRAVIS_OS_NAME
   - ls -l
 
 deploy:
   provider: releases
   api_key:
     secure: lQjv9EulUMLKGGaNmbBloDIM8TQCjkx2qfjCQwjU2DzZmFVWBrf6NP9Otf5Pq/vkYm7Q5ueTdRlRBLccV8rr8f8TgwL2aKKcy6/Q323A2g3kIbzRQGn8X8J0+GEMJYzeNt0AxtoxnCQ3hjE6WRTYo3qtM7sWlqIGwmLIuH30tANHc/fRq1JOXtZp6IOAwSro8AYF8inmlvG/AKw4yNyO6iJVXwkQfZHnM4AMBzVbhPhTPt1eIGUBDRCrEhAMAoJAF522Y2VN0i98KGT3HCDFpxa/6J45IU+04Cp62JN7bE+04Ryj5mSVRSQh8X7nfxd23PQamYEA006qjtaXgIaII8fI8+ekB0ptMqaYCn/ozeDuOpYew8O6ve2ODa+lu8A23KpFX7gma3Zhcetj12xExqE6spb+eUOrz+b3gRT/5cXvKjKZvz7+5wfr8S2GaWFY60QpTdJEyzfaQyt5mU+T4A8FamBKqYbeTkXhznqi6ltzVhpfblC54G9+Qr31eccmtIeOSmiq2J+DkUQMTljrbQztsJjhFwvjyNrxxME55Cc9F7dWFNyO0Ew+K6B2wdx4T8Nvoi+8LkKKv1H8xM8SKl1iszJXQUBYqu+fpY/nbrhSm0u7oayPrTaMH3WT4GWVg81XZJ5Rz+32nv/1+rh7sMfrXnRT3T0f8ZfBP6UNpkw=
-  file: $ARTIFACT
+  file: $NAME-$TRAVIS_OS_NAME
   skip_cleanup: true
   on:
     tags: true

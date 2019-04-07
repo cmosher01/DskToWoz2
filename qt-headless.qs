@@ -18,7 +18,7 @@ Controller.prototype.IntroductionPageCallback = function(){
 }
 
 Controller.prototype.TargetDirectoryPageCallback = function(){
-    gui.currentPageWidget().TargetDirectoryLineEdit.setText("C:\Qt");
+    gui.currentPageWidget().TargetDirectoryLineEdit.setText("C:\\Qt");
     gui.clickButton(buttons.NextButton);
 }
 
