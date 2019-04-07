@@ -25,7 +25,7 @@ matrix:
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
         - pwd
-        - ./qt-unified-windows-x86-online.exe --verbose --script qt-headless.qs
+        - ./qt-opensource-windows-x86-5.12.2.exe --verbose --script qt-headless.qs
 
 script:
   - env
