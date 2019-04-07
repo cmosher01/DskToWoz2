@@ -1,49 +1,46 @@
 language: cpp
 
-env:
-  global:
-    - NAME=$(basename *.pro .pro)
-
 matrix:
   include:
     - os: linux
       dist: xenial
       sudo: required
       env:
-        - ARTIFACT=${NAME}-${TRAVIS_OS_NAME}
+        - ARTIFACT=$(basename *.pro .pro)-${TRAVIS_OS_NAME}
       before_install:
         - sudo apt-get -qq update
       install:
         - sudo apt-get install -y build-essential qt5-default
+      script:
+        - qmake
+        - make TARGET=$ARTIFACT
     - os: osx
       env:
-        - ARTIFACT=${NAME}-${TRAVIS_OS_NAME}
+        - ARTIFACT=$(basename *.pro .pro)-${TRAVIS_OS_NAME}
         - PATH=/usr/local/opt/qt/bin:$PATH
       install:
         - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt
+      script:
+        - qmake
+        - make TARGET=$ARTIFACT
     - os: windows
       before_install:
         - curl -LO http://download.qt.io/official_releases/qt/5.12/5.12.2/qt-opensource-windows-x86-5.12.2.exe
       env:
-        - ARTIFACT=${NAME}-${TRAVIS_OS_NAME}.exe
+        - ARTIFACT=$(basename $(pwd).exe
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
         - pwd
         - ./qt-opensource-windows-x86-5.12.2.exe --verbose --script qt-headless.qs
-
-script:
-  - env
-  - pwd
-  - qmake
-  - cat Makefile*
-  - make TARGET=$ARTIFACT
-  - ls -l
+      script:
+        - qmake
+        - make
 
 deploy:
   provider: releases
   api_key:
     secure: lQjv9EulUMLKGGaNmbBloDIM8TQCjkx2qfjCQwjU2DzZmFVWBrf6NP9Otf5Pq/vkYm7Q5ueTdRlRBLccV8rr8f8TgwL2aKKcy6/Q323A2g3kIbzRQGn8X8J0+GEMJYzeNt0AxtoxnCQ3hjE6WRTYo3qtM7sWlqIGwmLIuH30tANHc/fRq1JOXtZp6IOAwSro8AYF8inmlvG/AKw4yNyO6iJVXwkQfZHnM4AMBzVbhPhTPt1eIGUBDRCrEhAMAoJAF522Y2VN0i98KGT3HCDFpxa/6J45IU+04Cp62JN7bE+04Ryj5mSVRSQh8X7nfxd23PQamYEA006qjtaXgIaII8fI8+ekB0ptMqaYCn/ozeDuOpYew8O6ve2ODa+lu8A23KpFX7gma3Zhcetj12xExqE6spb+eUOrz+b3gRT/5cXvKjKZvz7+5wfr8S2GaWFY60QpTdJEyzfaQyt5mU+T4A8FamBKqYbeTkXhznqi6ltzVhpfblC54G9+Qr31eccmtIeOSmiq2J+DkUQMTljrbQztsJjhFwvjyNrxxME55Cc9F7dWFNyO0Ew+K6B2wdx4T8Nvoi+8LkKKv1H8xM8SKl1iszJXQUBYqu+fpY/nbrhSm0u7oayPrTaMH3WT4GWVg81XZJ5Rz+32nv/1+rh7sMfrXnRT3T0f8ZfBP6UNpkw=
-  file: ${ARTIFACT}
+  file: $ARTIFACT
   skip_cleanup: true
   on:
     tags: true
