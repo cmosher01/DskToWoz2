@@ -30,7 +30,7 @@ matrix:
         - ARTIFACT=$(basename $(pwd).exe
         - PATH=/c/Qt/5.12.2/mingw73_64/bin:/c/Qt/Tools/mingw730_64/bin:$PATH
       install:
-        - pwd
+        - choco install make
         - ./qt-opensource-windows-x86-5.12.2.exe --verbose --script qt-headless.qs
       script:
         - qmake
