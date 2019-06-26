@@ -1,7 +1,9 @@
 ---
 install:
-  - set QTDIR=C:\Qt\5.11.0\mingw53_32
-  - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw530_32\bin;%PATH%
+  - set QTDIR=C:\Qt\5.12.2\mingw73_64
+  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+before_build:
+  - set ARCH=x64
+  - qmake -d dsktowoz2.pro
 build_script:
-  - qmake dsktowoz2.pro
   - mingw32-make
