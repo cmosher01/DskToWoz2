@@ -7,7 +7,7 @@ before_build:
   - qmake dsktowoz2.pro
 build_script:
   - mingw32-make
-  - zip -j ${APPVEYOR_PROJECT_NAME}-win release/${APPVEYOR_PROJECT_NAME}.exe
+  - 7z a ${APPVEYOR_PROJECT_NAME}-win.zip release\${APPVEYOR_PROJECT_NAME}.exe
 artifacts:
   - path: '*.zip'
 deploy:
