@@ -1,2 +1,5 @@
+/dsktowoz2
 *.o
 moc_*
+.qmake.stash
+/Makefile
