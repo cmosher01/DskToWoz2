@@ -9,13 +9,14 @@ build_script:
   - mingw32-make
   - 7z a %APPVEYOR_PROJECT_NAME%-win.zip release\*.exe
 artifacts:
-  - path: '*.zip'
+  - name: zipfile
+    path: '*.zip'
 deploy:
   description: Latest stable release
   provider: GitHub
   auth_token:
     secure: TjyyWBvqvk2/j05cBmpMpWsBslEdpJV2JOWy/5Uwr7IP1zKVMx/x97deqVskxx6L
-  artifact: '*.zip'
+  artifact: zipfile
   on:
     branch: master
     APPVEYOR_REPO_TAG: true
